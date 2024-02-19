@@ -14,9 +14,9 @@ The class ids are numbered 1-4 where 1 represents World, 2 represents Sports, 3 
 
 ### Tokenizer Model - DistilBERT
 
-DistilBERT is a small, fast, cheap and light Transformer model trained by distilling BERT base. It has 40% less parameters than bert-base-uncased, runs 60% faster while preserving over 95% of BERT’s performances.
+DistilBER is Transformer model, offers a cost-effective and efficient alternative to BERT base. With 40% fewer parameters and a 60% faster runtime, it maintains over 95% of BERT's performance through distillation.
 
-Here, we are using model 'distilbert-base-uncased'. So we use tokenizer for the DISTILBERT model with the "base" architecture and the "cased" version.
+In our project, we're utilizing the 'distilbert-base-uncased' model. Hence, we employ the tokenizer designed for the DISTILBERT model with the "base" architecture and the "uncased" version.
 
 
 ### Steps followed in this project
@@ -30,52 +30,44 @@ Here, we are using model 'distilbert-base-uncased'. So we use tokenizer for the 
 
 ### Data Preprocessing
 
-There is both training and testing samples avaialbe from the source(Kaggle), So there is no need to split the data to train-test samples. 
+The dataset from Kaggle contains both training and testing samples, eliminating the need for splitting the data into train-test sets. Initially, each sample comprises three columns: Class Id, Title, and Description. As the first preprocessing step, we merged the Title and Description into a new column called 'text', and renamed the 'Class Id' column to 'label'.
 
-Inititally we have three columns present in the samples, which are Class Id, Title and Description. As a first preprocessing step, we have combined both Title and Description as new column, which named as 'text' and the 'Class Id' is renamed to 'label'.
+Upon examining the class distributions of labels, we found no significant imbalances. Therefore, there's no requirement for any class imbalance processing on the label column, and we can proceed with accuracy as the evaluation metric.
 
-When we checked the class distributions of labels, there is no much imbalances present. So we don't need to any class imbalance processing on label column, and we can proceed with accuray as evalution metric.
+The class ids are represented as follows:
 
-The class ids are numbered 0-3 where
-
-        0 - World,
-        1 - Sports,
-        2 - Business
-        3 - Sci/Tech.
-
-For the training we choose only 36k samples of data due to the computational limitations.  
+0: World
+1: Sports
+2: Business
+3: Sci/Tech
+For training purposes, we opted to utilize only 36,000 samples of data to accommodate 
  
 ### Prepapre Tokenizer
 
-Convert the data into a numerical representation suitable for input into the Transformer model. This typically involves tokenizing the text into subwords or words, mapping the tokens to integers, and encoding the input as a tensor.
+To prepare the data for input into the Transformer model, we'll convert it into a numerical representation. This involves tokenizing the text into subwords or words, mapping these tokens to integers, and encoding the input as a tensor.
 
-DistilBERT is a small, fast, cheap and light Transformer model trained by distilling BERT base. It has 40% less parameters than bert-base-uncased, runs 60% faster while preserving over 95% of BERT’s performances.
+We've opted to utilize DistilBERT, a compact Transformer model derived from BERT base, known for its efficiency and performance. Specifically, we're employing the 'distilbert-base-uncased' model, which is smaller and faster while retaining a significant portion of BERT's performance.
 
-Here, we are using model 'distilbert-base-uncased'. So we use tokenizer for the DISTILBERT model with the "base" architecture and the "cased" version.
+We'll use the tokenizer designed for the DISTILBERT model with the "base" architecture and the "uncased" version, ensuring compatibility with our chosen model architecture.
 
-The from_pretrained() method takes care of returning the correct tokenizer class instance based on the model_type defined, here we have 'distilbert-base-uncased'. 
+The from_pretrained() method facilitates the instantiation of the appropriate tokenizer class instance based on the specified model type, in our case, 'distilbert-base-uncased'.
 
-For the tokenizer, “truncation” argument is set to “True”, which means that the tokenization function will truncate sequences that are longer than the maximum length specified by the model.
+Additionally, we've set the "truncation" argument of the tokenizer to "True", indicating that sequences longer than the maximum length specified by the model will be truncated during tokenization.
 
 ### Train the Model
 
-Since we will be using DistilBERT as our base model, we begin by importing distilbert-base-uncased from the Hugging Face library.
+To initiate the training process using DistilBERT as our base model, we start by importing 'distilbert-base-uncased' from the Hugging Face library.
 
-The fine-tuing approach: 
-We have to decide which layers of the pre-trained model to fine-tune, here keeping the all the weights of the pre-trained model frozen and optimizing only the weights of the head layers ie. pre_classifier and classifier layer.  To temporarily freeze the pre-trained weights, set layer.trainable = False for each of layers. 
-The percentage of trainble weights to the total weghits is 0.8% .
+For the fine-tuning approach, we've chosen to freeze all the weights of the pre-trained model and optimize only the weights of the head layers, specifically the 'pre_classifier' and 'classifier' layers. This involves setting layer.trainable = False for each of these layers. The percentage of trainable weights relative to the total weights is set to 0.8%.
 
-Before you start training your model, create a map of the expected ids to their labels with id2label and label2id:
+Before commencing the training, it's essential to create a mapping of the expected ids to their corresponding labels using dictionaries:
 
+id2label = {0: "World", 1: "Sports", 2: "Business", 3: 'Sci/Tech'}
+label2id = {"World": 0, "Sports": 1, "Business": 2, 'Sci/Tech': 3}
 
-id2label = {0: "World", 1: "Sports",2:"Business",3:'Sci/Tech'}
-label2id = {"World":0, "Sports":1,"Business":2,'Sci/Tech':3}
+The 'AutoModelForSequenceClassification' class from the transformers library is utilized to implement a sequence classification model, which predicts the class of a sequence of inputs, such as a sentence.
 
-'AutoModelForSequenceClassification' is a class from the transformers library that implements a sequence classification model, a type of model that is used to predict the class of a sequence of inputs (e.g., a sentence). 
-
-'TrainingArguments' is a class that defines the arguments used to configure a training run. It includes arguments such as the number of training steps, the learning rate, the batch size, and many others. When using the Trainer class, an instance of TrainingArguments is passed to the constructor to specify the configuration for a training run.
-
-
+'TrainingArguments' is another class that defines the arguments needed to configure a training run, including parameters like the number of training steps, learning rate, batch size, etc. When utilizing the Trainer class, an instance of TrainingArguments is provided to the constructor to specify the configuration for a training run.
 
 ##### TrainingArguments:
 
@@ -100,13 +92,13 @@ The Trainer class takes several arguments:
 
 ###  Evaluate the model
 
-When we check the model perfomances from the training, both training and validation loss reduced with epochs. 
+During training, we observed a consistent reduction in both training and validation loss across epochs, indicating that the model's performance improved over time.
 
 ![alt text](image-1.png)
 
 ![alt text](image-2.png)
 
-The accuracy got improved from 87% to 89% with five epochs and limited dataset.
+The model's accuracy demonstrated notable improvement, advancing from 87% to 89% over the course of five epochs despite the constraints of a limited dataset.
 
 
 
